@@ -1,0 +1,25 @@
+ingestion:
+  data_api_base: https://data-api.polymarket.com
+  gamma_api_base: https://gamma-api.polymarket.com
+  polygon_rpc: ${POLYGON_RPC_URL}
+  rate_limit_rps: 2.0
+  retry_max_attempts: 5
+  retry_backoff_base_sec: 2.0
+  cross_validation_sample_rate: 0.05
+  cross_validation_min_volume_usd: 100000
+
+storage:
+  root_path: ./data
+  parquet_compression: zstd
+  wallet_partition_bits: 8
+
+price_series:
+  bucket_seconds: 60
+  max_interpolation_gap_seconds: 21600
+
+migration:
+  v1_v2_cutover_ts: 1745841600  # 2026-04-28 12:00 UTC
+  v1_exchange_addresses:
+    - "0x4bFb41d5B3570DeFd03C39a9A4D8dE6Bd8B8982E"
+  v2_exchange_addresses:
+    - "0xC5d563A36AE78145C45a50134d48A1215220f80a"

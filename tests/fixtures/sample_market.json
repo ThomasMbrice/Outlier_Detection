@@ -1,0 +1,11 @@
+{
+  "conditionId": "0xabc123def456abc123def456abc123def456abc123def456abc123def456abcd",
+  "question": "Will the Fed cut rates in Q2 2026?",
+  "category": null,
+  "createdAt": 1740000000,
+  "endDate": 1748000000,
+  "resolutionTime": 1748500000,
+  "resolutionOutcome": "1",
+  "volume": "5200000.00",
+  "uniqueTraders": 342
+}

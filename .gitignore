@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+dist/
+build/
+.pytest_cache/
+
+# Data (never commit Parquet files)
+data/
+
+# Environment
+.env
+*.env
+
+# Editors
+.DS_Store
+.idea/
+.vscode/
+
+# Notebooks checkpoints
+.ipynb_checkpoints/
+
+# Coverage
+.coverage
+htmlcov/
