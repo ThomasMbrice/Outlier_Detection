@@ -176,15 +176,19 @@ class Storage:
     # ------------------------------------------------------------------
 
     def write_prices(self, prices: Iterable[MarketPrice]) -> None:
-        by_market: Dict[str, List[Dict]] = {}
+        # Group by output path (multiple markets share the same file by prefix)
+        # so each file is written exactly once.
+        by_path: Dict[Path, List[Dict]] = {}
         for p in prices:
-            by_market.setdefault(p.condition_id, []).append(asdict(p))
+            path = self._prices_path(p.condition_id)
+            by_path.setdefault(path, []).append(asdict(p))
 
-        for condition_id, rows in by_market.items():
-            path = self._prices_path(condition_id)
+        for path, rows in by_path.items():
             new_table = pa.Table.from_pylist(rows)
             if path.exists():
-                existing = pq.read_table(path)
+                # Round-trip through pylist to normalize any dictionary-encoded
+                # or otherwise mistyped columns from previous writes.
+                existing = pa.Table.from_pylist(pq.read_table(path).to_pylist())
                 combined = _dedup_by_key(existing, new_table, key=None, sort_by="ts")
             else:
                 combined = new_table
