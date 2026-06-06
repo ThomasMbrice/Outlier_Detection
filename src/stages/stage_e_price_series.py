@@ -126,11 +126,16 @@ def run(cfg: Config, storage: Storage) -> int:
         for ts, b in buckets.items():
             b["vwap"] = _vwap(b["prices"], b["sizes"])
 
+    # Collect all prices first, then write once per file to avoid
+    # repeated read-merge-write cycles that cause schema mismatches.
+    all_prices: List[MarketPrice] = []
     total = 0
     for condition_id, buckets in by_market.items():
         prices = _interpolate(buckets, bucket_sec, max_gap)
-        storage.write_prices(prices)
+        all_prices.extend(prices)
         total += len(prices)
-        log.info("market %s: %d price rows written", condition_id, len(prices))
+        log.info("market %s: %d price rows", condition_id, len(prices))
+
+    storage.write_prices(all_prices)
 
     return total

@@ -230,6 +230,28 @@ class Storage:
 # Private helpers
 # ------------------------------------------------------------------
 
+def _align_schema(table: pa.Table, target: pa.Table) -> pa.Table:
+    """Cast table columns to match target schema.
+
+    Handles dictionary-encoded columns that Parquet readers produce for
+    low-cardinality fields. Dictionary columns must be decoded before casting
+    because pa.cast() cannot go directly from dictionary<T> to a plain type.
+    """
+    if table.schema == target.schema:
+        return table
+    new_cols = {}
+    for field in target.schema:
+        if field.name not in table.schema.names:
+            continue
+        col = table.column(field.name)
+        if pa.types.is_dictionary(col.type):
+            col = col.dictionary_decode()
+        if col.type != field.type:
+            col = col.cast(field.type)
+        new_cols[field.name] = col
+    return pa.table(new_cols)
+
+
 def _dedup_by_key(
     existing: pa.Table,
     incoming: pa.Table,
@@ -237,6 +259,8 @@ def _dedup_by_key(
     sort_by: str | None = None,
 ) -> pa.Table:
     """Merge two tables, keeping incoming rows when keys collide."""
+    existing = _align_schema(existing, incoming)
+
     if key is None:
         combined = pa.concat_tables([existing, incoming])
     else:
